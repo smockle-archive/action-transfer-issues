@@ -117,7 +117,7 @@ export class Repository {
             }
             await this.#createLabel(label);
         }
-        return await this.#client.rest.issues.create({
+        return (await this.#client.rest.issues.create({
             owner: this.owner,
             repo: this.repo,
             title: issue.title,
@@ -131,6 +131,6 @@ export class Repository {
                 }
                 return assignees;
             }, undefined),
-        });
+        }))?.data;
     };
 }
