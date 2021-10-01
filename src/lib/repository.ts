@@ -166,7 +166,7 @@ export class Repository {
         title: issue.title,
         body: issue.body || "",
         labels: [...issue.labels, transferredFromLabel],
-        assignee: issue.assignee?.login,
+        assignee: !issue.assignees ? issue.assignee?.login : undefined,
         assignees: issue.assignees?.reduce(
           (assignees: string[] | undefined, assignee) => {
             const login = assignee?.login;
