@@ -76,13 +76,15 @@ export class Repository {
             return;
         }
         console.log(`Creating label: ${label.name}`);
-        await this.#client.rest.issues.createLabel({
+        const newLabel = (await this.#client.rest.issues.createLabel({
             owner: this.owner,
             repo: this.repo,
             name: label.name,
             description: label.description || undefined,
             color: label.color || undefined,
-        });
+        }))?.data;
+        this.#labelCache = this.#labelCache.concat(newLabel);
+        return newLabel;
     };
     /**
      * Fetch the issue with the given issue number. This method is used to obtain
