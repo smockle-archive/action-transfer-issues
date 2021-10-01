@@ -154,6 +154,10 @@ export class Repository {
       }
       await this.#createLabel(label as Label);
     }
+    const transferredFromLabel: Label = {
+      name: `transferred-from: ${source}`.substring(0, 50),
+    };
+    await this.#createLabel(transferredFromLabel);
 
     return (
       await this.#client.rest.issues.create({
@@ -161,7 +165,7 @@ export class Repository {
         repo: this.repo,
         title: issue.title,
         body: issue.body || "",
-        labels: issue.labels,
+        labels: [...issue.labels, transferredFromLabel],
         assignee: issue.assignee?.login,
         assignees: issue.assignees?.reduce(
           (assignees: string[] | undefined, assignee) => {
