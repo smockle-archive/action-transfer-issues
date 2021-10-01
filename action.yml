@@ -1,0 +1,19 @@
+name: "action-transfer-issues"
+author: "smockle"
+description: "Transfer issues from one repo to another, even across orgs."
+inputs:
+  source:
+    description: "The full name of the repo (with owner) which contains issues to transfer."
+    required: true
+  destination:
+    description: "The full name of the repo (with owner) to which issues will be transferred."
+    required: true
+  issue_numbers:
+    description: "A space-delimited list of issue numbers indicating the issues to transfer."
+    required: true
+runs:
+  using: "docker"
+  image: "Dockerfile"
+branding:
+  icon: "copy"
+  color: "blue"
