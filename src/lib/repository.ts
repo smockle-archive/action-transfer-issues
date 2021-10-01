@@ -83,7 +83,7 @@ export class Repository {
    * because it’s not core functionality (this action’s focus is issue transfers)
    * however, label creation is a necessary pre-requisite for issue transfers.
    */
-  #createLabel = async (label: Label) => {
+  #createLabel = async (label: Label): Promise<Label | undefined> => {
     // Return early if the label already exists.
     if (this.#labelCache.length === 0) {
       await this.#populateLabelCache();
@@ -98,13 +98,17 @@ export class Repository {
       return;
     }
     console.log(`Creating label: ${label.name}`);
-    await this.#client.rest.issues.createLabel({
-      owner: this.owner,
-      repo: this.repo,
-      name: label.name!,
-      description: label.description || undefined,
-      color: label.color || undefined,
-    });
+    const newLabel: Label = (
+      await this.#client.rest.issues.createLabel({
+        owner: this.owner,
+        repo: this.repo,
+        name: label.name!,
+        description: label.description || undefined,
+        color: label.color || undefined,
+      })
+    )?.data;
+    this.#labelCache = this.#labelCache.concat(newLabel);
+    return newLabel;
   };
 
   /**
