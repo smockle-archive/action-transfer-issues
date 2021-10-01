@@ -65,7 +65,7 @@ export class Repository {
         await this.#client.rest.issues.listForRepo({
           owner: this.owner,
           repo: this.repo,
-          labels: `transferred-from: ${source}`,
+          labels: `transferred-from: ${source}`.substring(0, 50),
           page: pageIndex++,
           per_page: perPage,
         })
