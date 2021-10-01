@@ -18,6 +18,8 @@ export async function transferIssues({ client, source, destination, issueNumbers
         }
         // Copy issue to destination repo.
         const destinationIssue = await destinationRepo.transferIssue(sourceIssue);
-        console.log(`Transferred ${source}#${issueNumber} to ${destination}#${destinationIssue?.number}`);
+        if (destinationIssue?.number !== undefined) {
+            console.log(`Transferred ${source}#${issueNumber} to ${destination}#${destinationIssue?.number}`);
+        }
     }
 }
