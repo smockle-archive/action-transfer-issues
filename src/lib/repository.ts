@@ -92,12 +92,12 @@ export class Repository {
       ({ name }) => name === label.name
     );
     if (duplicateLabel) {
-      console.log(
-        `Skipping label creation. Label source (${label.name}) already exists at destination (${duplicateLabel.name}).`
-      );
+      // console.log(
+      //   `Skipping label creation. Label source (${label.name}) already exists at destination (${duplicateLabel.name}).`
+      // );
       return;
     }
-
+    console.log(`Creating label: ${label.name}`);
     await this.#client.rest.issues.createLabel({
       owner: this.owner,
       repo: this.repo,
