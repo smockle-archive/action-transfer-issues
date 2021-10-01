@@ -51,11 +51,14 @@ export async function transferIssues({
 
   for (const issueNumber of issueNumbers) {
     // Retrieve issue from source repo.
-    const issue = await sourceRepo.getIssue(issueNumber);
-    if (!issue) {
+    const sourceIssue = await sourceRepo.getIssue(issueNumber);
+    if (!sourceIssue) {
       throw new Error(`Failed to retrieve issue: ${source}#${issueNumber}.`);
     }
     // Copy issue to destination repo.
-    await destinationRepo.transferIssue(issue);
+    const destinationIssue = await destinationRepo.transferIssue(sourceIssue);
+    console.log(
+      `Transferred ${source}#${issueNumber} to ${destination}#${destinationIssue?.number}`
+    );
   }
 }

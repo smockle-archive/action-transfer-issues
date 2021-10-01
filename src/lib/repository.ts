@@ -125,7 +125,7 @@ export class Repository {
    * Create a new issue with the same attributes as the provided issue.
    * This method is used to copy an issue to the destination repository.
    */
-  transferIssue = async (issue: Issue) => {
+  transferIssue = async (issue: Issue): Promise<Issue | undefined> => {
     const { source } = issue.repository_url.match(
       /^(?<_>.+)\/(?<source>.+\/.+)$/
     )!.groups as { source: string };
@@ -155,23 +155,25 @@ export class Repository {
       await this.#createLabel(label as Label);
     }
 
-    return await this.#client.rest.issues.create({
-      owner: this.owner,
-      repo: this.repo,
-      title: issue.title,
-      body: issue.body || "",
-      labels: issue.labels,
-      assignee: issue.assignee?.login,
-      assignees: issue.assignees?.reduce(
-        (assignees: string[] | undefined, assignee) => {
-          const login = assignee?.login;
-          if (login) {
-            assignees = (assignees || []).concat(login);
-          }
-          return assignees;
-        },
-        undefined
-      ),
-    });
+    return (
+      await this.#client.rest.issues.create({
+        owner: this.owner,
+        repo: this.repo,
+        title: issue.title,
+        body: issue.body || "",
+        labels: issue.labels,
+        assignee: issue.assignee?.login,
+        assignees: issue.assignees?.reduce(
+          (assignees: string[] | undefined, assignee) => {
+            const login = assignee?.login;
+            if (login) {
+              assignees = (assignees || []).concat(login);
+            }
+            return assignees;
+          },
+          undefined
+        ),
+      })
+    )?.data;
   };
 }
