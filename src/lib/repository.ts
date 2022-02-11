@@ -10,9 +10,11 @@ type Label = Exclude<Unwrapped<Issue["labels"]>, string>;
 
 /** https://docs.github.com/en/graphql/reference/mutations#transferissue */
 type TransferIssueReturnFields = {
-  clientMutationId: string,
-  issue: Pick<Issue, "id" | "number" | "url" | "state" | "title" | "labels" | "locked">
-}
+  transferIssue: {
+    clientMutationId: string,
+    issue: Pick<Issue, "id" | "number" | "url" | "state" | "title" | "labels" | "locked">
+  }
+} 
 
 interface StrictLabel extends Label {
   name: string
@@ -132,9 +134,6 @@ export class Repository {
       ({ name }) => name === label.name
     );
     if (duplicateLabel) {
-      // console.log(
-      //   `Skipping label creation. Label source (${label.name}) already exists at destination (${duplicateLabel.name}).`
-      // );
       return;
     }
     console.log(`Creating label: ${label.name}`);
@@ -169,7 +168,7 @@ export class Repository {
    * Create a new issue with the same attributes as the provided issue.
    * This method is used to transfer or copy an issue to the destination repository.
    */
-  transferIssue = async (issue: Issue): Promise<Issue | TransferIssueReturnFields["issue"] | undefined> => {
+  transferIssue = async (issue: Issue): Promise<Issue | TransferIssueReturnFields["transferIssue"]["issue"] | undefined> => {
     const {sourceOwner, sourceRepo} = issue.repository_url.match(
       /^(?<_>.+)\/(?<sourceOwner>.+)\/(?<sourceRepo>.+)$/
     )!.groups as { sourceOwner: string, sourceRepo: string };
@@ -218,23 +217,23 @@ export class Repository {
 
     if (canTransferBetweenOrgs && canTransferBetweenVisibilities) {
       // Transfer operation is allowed.
-      const sourceIssueId = (await this.#client.graphql<{ id: string }>(`query {
-        repository(owner: ${source.owner}, name: ${source.repo}) {
+      const sourceIssueId = (await this.#client.graphql<{ repository: { issue: { id: string } } }>(`query {
+        repository(owner: "${source.owner}", name: "${source.repo}") {
           issue(number: ${issue.number}) {
             id
           }
         }
-      }`))?.id
-      const destinationRepoId = (await this.#client.graphql<{ id: string }>(`query {
-        repository(owner: ${this.owner}, name: ${this.repo}) {
+      }`))?.repository.issue.id
+      const destinationRepoId = (await this.#client.graphql<{ repository: { id: string } }>(`query {
+        repository(owner: "${this.owner}", name: "${this.repo}") {
           id
         }
-      }`))?.id
+      }`))?.repository.id
       const transferredIssue = (await this.#client.graphql<TransferIssueReturnFields>(`mutation {
         transferIssue(
           input: {
-            issueId: ${sourceIssueId}
-            repositoryId: ${destinationRepoId}
+            issueId: "${sourceIssueId}"
+            repositoryId: "${destinationRepoId}"
           }
         ) {
           issue {
@@ -251,7 +250,7 @@ export class Repository {
             locked
           }
         }
-      }`))?.issue
+      }`))?.transferIssue.issue
       // https://docs.github.com/en/issues/tracking-your-work-with-issues/transferring-an-issue-to-another-repository notes that:
       // “The issue's labels…are not retained.” As a workaround, re-add them.
       transferredIssue.labels = (await this.#client.rest.issues.addLabels({
