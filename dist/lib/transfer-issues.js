@@ -16,7 +16,7 @@ export async function transferIssues({ client, source, destination, issueNumbers
         if (!sourceIssue) {
             throw new Error(`Failed to retrieve issue: ${source}#${issueNumber}.`);
         }
-        // Copy issue to destination repo.
+        // Transfer or copy issue to destination repo.
         const destinationIssue = await destinationRepo.transferIssue(sourceIssue);
         if (destinationIssue?.number !== undefined) {
             console.log(`Transferred ${source}#${issueNumber} to ${destination}#${destinationIssue?.number}`);

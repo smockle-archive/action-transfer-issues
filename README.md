@@ -2,6 +2,19 @@
 
 Transfer issues from one repo to another, even across orgs.
 
+## Features
+
+[Transferring an issue to another repository](https://docs.github.com/en/issues/tracking-your-work-with-issues/transferring-an-issue-to-another-repository) describes GitHub’s built-in issue transfer functionality. The table below contrasts built-in transfers with this action’s transfers:
+
+| Transfers                            | Built-in                     | This Action                    |
+| :----------------------------------- | :--------------------------- | :----------------------------- |
+| Between repos in the same org        | 🟡 Supported, without labels | 🟢 Supported                   |
+| Between repos in different orgs      | 🔴 Not Supported             | 🟡 Supported, without comments |
+| Between public repos                 | 🟡 Supported, without labels | 🟢 Supported                   |
+| Between private repos                | 🟡 Supported, without labels | 🟢 Supported                   |
+| From a public repo to a private repo | 🟡 Supported, without labels | 🟢 Supported                   |
+| From a private repo to a public repo | 🔴 Not Supported             | 🟡 Supported, without comments |
+
 ## Usage
 
 ### Inputs
