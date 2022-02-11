@@ -258,7 +258,7 @@ export class Repository {
         owner: this.owner,
         repo: this.repo,
         issue_number: transferredIssue.number,
-        labels
+        labels: labels.map(({ name }) => name)
       }))?.data
       return transferredIssue
     } else {
