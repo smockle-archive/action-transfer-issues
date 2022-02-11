@@ -210,6 +210,9 @@ export class Repository {
 
     // Set the source repository’s `visibility` attribute.
     await source.#populateVisibility();
+    if (typeof this.visibility === "undefined") {
+      await this.#populateVisibility();
+    }
     /** Whether this is a public-to-public, public-to-private, or private-to-private operation. */
     const canTransferBetweenVisibilities = source.visibility === Visibility.Public || (source.visibility === Visibility.Private && this.visibility === Visibility.Private);
 
