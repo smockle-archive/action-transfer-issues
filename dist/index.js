@@ -2,6 +2,15 @@
 import core from "@actions/core";
 import github from "@actions/github";
 import { transferIssues } from "./lib/transfer-issues";
+/** Time to sleep (in milliseconds) before a request. */
+const DELAY = 1000;
+/**
+ * Resolve after the specified duration has elapsed.
+ * @param duration Time to sleep (in milliseconds).
+ */
+function sleep(duration) {
+    return new Promise((resolve) => setTimeout(resolve, duration));
+}
 (async () => {
     try {
         // Retrieve GitHub token from environment.
@@ -40,8 +49,9 @@ import { transferIssues } from "./lib/transfer-issues";
         if (issueNumbers.size === 0) {
             throw new Error(`Failed to retrieve 'issue_numbers'.`);
         }
-        // Retrieve an authenticated client
+        // Retrieve an authenticated client that sleeps before each request.
         const client = github.getOctokit(token);
+        client.hook.before("request", async () => { await sleep(DELAY); });
         // Transfer specified issues
         await transferIssues({
             client,
