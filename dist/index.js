@@ -8,7 +8,7 @@ const DELAY = 1000;
  * Resolve after the specified duration has elapsed.
  * @param duration Time to sleep (in milliseconds).
  */
-function sleep(duration) {
+async function sleep(duration) {
     return new Promise((resolve) => setTimeout(resolve, duration));
 }
 (async () => {
@@ -49,12 +49,24 @@ function sleep(duration) {
         if (issueNumbers.size === 0) {
             throw new Error(`Failed to retrieve 'issue_numbers'.`);
         }
-        // Retrieve an authenticated client that sleeps before each request.
+        // Retrieve an authenticated client
         const client = github.getOctokit(token);
-        client.hook.before("request", async () => { await sleep(DELAY); });
+        const wrappedClient = Object.create(client);
+        // Sleep before REST API calls
+        wrappedClient.hook.before("request", async () => {
+            await sleep(DELAY);
+        });
+        // Sleep before GraphQL API calls
+        async function wrappedGraphQL(...args) {
+            await sleep(DELAY);
+            return client.graphql(...args);
+        }
+        wrappedGraphQL.defaults = undefined;
+        wrappedGraphQL.endpoint = undefined;
+        wrappedClient.graphql = wrappedGraphQL;
         // Transfer specified issues
         await transferIssues({
-            client,
+            client: wrappedClient,
             source,
             destination,
             issueNumbers,
