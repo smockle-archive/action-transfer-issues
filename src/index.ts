@@ -5,14 +5,14 @@ import github from "@actions/github";
 import { transferIssues } from "./lib/transfer-issues";
 
 /** Time to sleep (in milliseconds) before a request. */
-const DELAY: number = 1000
+const DELAY: number = 1000;
 
 /**
  * Resolve after the specified duration has elapsed.
  * @param duration Time to sleep (in milliseconds).
  */
-function sleep(duration: number) {
-  return new Promise((resolve) => setTimeout(resolve, duration))
+async function sleep(duration: number) {
+  return new Promise((resolve) => setTimeout(resolve, duration));
 }
 
 (async () => {
@@ -61,13 +61,29 @@ function sleep(duration: number) {
       throw new Error(`Failed to retrieve 'issue_numbers'.`);
     }
 
-    // Retrieve an authenticated client that sleeps before each request.
-    const client = github.getOctokit(token)
-    client.hook.before("request", async () => { await sleep(DELAY) })
+    // Retrieve an authenticated client
+    const client = github.getOctokit(token);
+    const wrappedClient: typeof client = Object.create(client);
+
+    // Sleep before REST API calls
+    wrappedClient.hook.before("request", async () => {
+      await sleep(DELAY);
+    });
+
+    // Sleep before GraphQL API calls
+    async function wrappedGraphQL(
+      ...args: Parameters<typeof client.graphql>
+    ): ReturnType<typeof client.graphql> {
+      await sleep(DELAY);
+      return client.graphql(...args);
+    }
+    wrappedGraphQL.defaults = undefined as any;
+    wrappedGraphQL.endpoint = undefined as any;
+    wrappedClient.graphql = wrappedGraphQL as typeof client.graphql;
 
     // Transfer specified issues
     await transferIssues({
-      client,
+      client: wrappedClient,
       source,
       destination,
       issueNumbers,
